@@ -1,33 +1,25 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const Double = require("@mongoosejs/double");
 
-const expenseSchema = new Schema({
+const dataSchema = new Schema({
+  courseId: {
+    type: String,
+    required: true,
+  },
   title: {
     type: String,
     required: true,
   },
-  category: {
+  objective: {
     type: String,
     required: true,
   },
-  language: {
+  article: {
     type: String,
-    required: true,
   },
-  level: {
+  video: {
     type: String,
-    required: true,
   },
-  what_to_taught: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-
   action_by: {
     type: String,
     required: true,
@@ -42,4 +34,4 @@ const expenseSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("Course", expenseSchema);
+module.exports = mongoose.model("CourseMaterial", dataSchema);

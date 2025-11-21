@@ -97,6 +97,18 @@ const uploadSingleImage = async (req) => {
   return image;
 };
 
+const uploadSingleVideo = async (req) => {
+  if (!req.files?.length) {
+    return null;
+  }
+  const uploader = async (path) => await cloudinary.uploads(path, "Images");
+  const file = req.files[0];
+  const { path } = file;
+  const video = await uploader(path);
+  fs.unlinkSync(path);
+  return video;
+};
+
 const uploadMultipleImages = async (req, res, errorMessage) => {
   if (!req?.files?.length) {
     return null;
@@ -123,5 +135,6 @@ module.exports = {
   logoutSession,
 
   uploadSingleImage,
+  uploadSingleVideo,
   uploadMultipleImages,
 };

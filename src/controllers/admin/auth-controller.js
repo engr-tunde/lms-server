@@ -182,7 +182,6 @@ const logoutAdmin = async (req, res) => {
         const deleteData = await SessionStore.findByIdAndDelete(
           sessionToken._id
         );
-        console.log("deleteData", deleteData);
         if (deleteData) {
           return sendSuccess(res, "Successfully logged out");
         }

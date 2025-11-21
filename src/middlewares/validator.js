@@ -14,8 +14,8 @@ exports.validateAdmin = [
     .withMessage("Admin password is missing!"),
 ];
 
-exports.validateUpdateUserBalance = [
-  check("deposite_balance")
+exports.validateAddCourseOverview = [
+  check("title")
     .trim()
     .not()
     .isEmpty()

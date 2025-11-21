@@ -4,6 +4,7 @@ const express = require("express");
 
 const authRouter = require("./src/routes/admin/auth-routes");
 const adminRouter = require("./src/routes/admin/admin-routes");
+const adminCourseRouter = require("./src/routes/admin/admin-course-routes");
 
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
@@ -35,6 +36,7 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use("/api/v1/admin-auth", authRouter);
 app.use("/api/v1/admin", verifyLoginToken, adminRouter);
+app.use("/api/v1/admin/course", verifyLoginToken, adminCourseRouter);
 
 app.get("/", (req, res) => {
   res.send(
