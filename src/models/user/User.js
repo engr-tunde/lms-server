@@ -3,20 +3,13 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  first_name: {
-    type: String,
-    required: true,
-  },
-  last_name: {
+  name: {
     type: String,
     required: true,
   },
   email: {
     type: String,
     required: true,
-  },
-  phone: {
-    type: String,
   },
   password: {
     type: String,
@@ -25,7 +18,7 @@ const userSchema = new Schema({
   },
   status: {
     type: String,
-    default: "Pending",
+    default: "pending",
   },
   email_verified: {
     type: Boolean,

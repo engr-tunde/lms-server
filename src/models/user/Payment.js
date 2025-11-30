@@ -2,13 +2,17 @@ const Double = require("@mongoosejs/double");
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const orderSchema = new Schema({
+const dataSchema = new Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  course: {
+  order_id: {
+    type: String,
+    required: true,
+  },
+  order_title: {
     type: String,
     required: true,
   },
@@ -16,19 +20,7 @@ const orderSchema = new Schema({
     type: String,
     default: "US Dollar",
   },
-  original_total: {
-    type: Double,
-    required: true,
-  },
-  discount: {
-    type: Double,
-    required: true,
-  },
-  subtotal: {
-    type: Double,
-    required: true,
-  },
-  total_paid: {
+  amount_paid: {
     type: Double,
     required: true,
   },
@@ -37,7 +29,7 @@ const orderSchema = new Schema({
   },
   payment_status: {
     type: String,
-    default: "pending",
+    default: "paid",
   },
   created_at: {
     type: Date,
@@ -45,4 +37,4 @@ const orderSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+module.exports = mongoose.model("Payment", dataSchema);

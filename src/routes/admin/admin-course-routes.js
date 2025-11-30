@@ -8,6 +8,12 @@ const {
   deleteCourseCategory,
   addNewCourseOverview,
   addNewCourseMaterial,
+  addNewCourseRequirements,
+  setCoursePricing,
+  fetchAllCourses,
+  fetchCourseMaterials,
+  deleteCourseMaterial,
+  deleteCourse,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -23,5 +29,12 @@ router.post(
   upload.array("file"),
   addNewCourseMaterial
 );
+router.post("/add-course-requirements/:id", addNewCourseRequirements);
+router.post("/add-course-pricing/:id", setCoursePricing);
+
+router.get("/fetch-all-courses", fetchAllCourses);
+router.get("/fetch-course-materials/:material_id", fetchCourseMaterials);
+router.delete("/delete-course-material/:id", deleteCourseMaterial);
+router.delete("/delete-course/:id", deleteCourse);
 
 module.exports = router;

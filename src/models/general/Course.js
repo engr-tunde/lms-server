@@ -27,7 +27,39 @@ const expenseSchema = new Schema({
     type: String,
     required: true,
   },
-
+  requirements: {
+    type: Array,
+  },
+  audience: {
+    type: Array,
+  },
+  duration: {
+    type: String,
+  },
+  certificate: {
+    type: Boolean,
+    default: true,
+  },
+  price: {
+    type: Double,
+    default: 0,
+  },
+  currency: {
+    type: String,
+    default: "US Dollar",
+  },
+  discount: {
+    type: Double,
+    default: 0,
+  },
+  total_price: {
+    type: Double,
+    default: 0,
+  },
+  status: {
+    type: String,
+    status: "draft",
+  },
   action_by: {
     type: String,
     required: true,
