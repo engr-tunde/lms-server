@@ -29,7 +29,7 @@ const dataSchema = new Schema({
   },
   payment_status: {
     type: String,
-    default: "paid",
+    default: "completed",
   },
   created_at: {
     type: Date,

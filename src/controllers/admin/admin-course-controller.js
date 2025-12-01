@@ -9,6 +9,7 @@ const {
   uploadSingleVideo,
 } = require("../../middlewares/general");
 const CourseMaterial = require("../../models/general/CourseMaterial");
+const Order = require("../../models/user/Order");
 
 const addNewCourseCategory = async (req, res) => {
   const action_by = await actionUser(req.id);
@@ -160,14 +161,20 @@ const setCoursePricing = async (req, res) => {
   if (!action_by) {
     return sendError(res, "You are not authenticated");
   }
+  let price = req.body.price || 0;
+  let discount;
+
   req.body.action_by = action_by;
+  if (discount) {
+    discount = Number((req.body.discount / 100) * price);
+  } else {
+    discount = 0;
+  }
+  const total_price = price - discount;
 
   try {
     const course = await Course.findById(req.params.id);
     if (course) {
-      const price = req.body.price || 0;
-      const discount = req.body.discount || 0;
-      const total_price = price - discount;
       course.price = price;
       course.currency = req.body.currency || "US Dollar";
       course.discount = discount;
@@ -185,12 +192,64 @@ const setCoursePricing = async (req, res) => {
     return sendError(res, "Unable to complete course publishing");
   }
 };
+const setCourseAsDraft = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return sendError(res, "Course data does not exist");
+    }
+    if (course.status === "draft") {
+      return sendError(res, "Course is already saved as draft");
+    }
+    course.status = "draft";
+    await course.save();
+    return sendSuccess(res, "Course successfully saved as draft!", course);
+  } catch (error) {
+    return sendError(res, "Unable to fetch the course data");
+  }
+};
+const setCourseAsArchive = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    if (!course) {
+      return sendError(res, "Course data does not exist");
+    }
+    if (course.status === "archived") {
+      return sendError(res, "Course is already archived");
+    }
+    course.status = "archived";
+    await course.save();
+    return sendSuccess(res, "Course successfully archived!", course);
+  } catch (error) {
+    return sendError(res, "Unable to fetch the course data");
+  }
+};
 const fetchAllCourses = async (req, res) => {
   try {
     const courses = await Course.find()
       .sort({ _id: "desc" })
       .limit(req.query.limit);
-    return sendSuccess(res, "Successfully fetched courses", courses);
+
+    let totalCoursesCount = courses?.length;
+    let publishedCoursesCount = courses?.filter(
+      (item) => item.status === "published"
+    )?.length;
+    let draftCoursesCount = courses?.filter(
+      (item) => item.status === "draft"
+    )?.length;
+    let archivedCoursesCount = courses?.filter(
+      (item) => item.status === "archived"
+    )?.length;
+
+    return sendSuccess(res, "Successfully fetched courses", {
+      courses: courses,
+      summary: {
+        totalCoursesCount,
+        publishedCoursesCount,
+        draftCoursesCount,
+        archivedCoursesCount,
+      },
+    });
   } catch (error) {
     console.log(error);
     return sendError(res, "Unable to fetch the data");
@@ -221,6 +280,24 @@ const fetchCourseMaterials = async (req, res) => {
   }
 };
 
+const fetchCourseOrders = async (req, res) => {
+  try {
+    const courseOrders = await Order.find({
+      course_id: req.params.course_id,
+    })
+      .sort({ _id: "desc" })
+      .limit(req.query.limit);
+    return sendSuccess(
+      res,
+      "Successfully fetched course's orders",
+      courseOrders
+    );
+  } catch (error) {
+    console.log(error);
+    return sendError(res, "Unable to fetch the data");
+  }
+};
+
 const deleteCourseMaterial = async (req, res) => {
   try {
     await CourseMaterial.findByIdAndDelete(req.params.id);
@@ -241,9 +318,13 @@ module.exports = {
   addNewCourseMaterial,
   addNewCourseRequirements,
   setCoursePricing,
+  setCourseAsDraft,
+  setCourseAsArchive,
+
   fetchAllCourses,
   deleteCourse,
 
   fetchCourseMaterials,
+  fetchCourseOrders,
   deleteCourseMaterial,
 };

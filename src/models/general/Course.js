@@ -56,6 +56,9 @@ const expenseSchema = new Schema({
     type: Double,
     default: 0,
   },
+  purchased_by: {
+    type: Array,
+  },
   status: {
     type: String,
     status: "draft",
@@ -64,6 +67,7 @@ const expenseSchema = new Schema({
     type: String,
     required: true,
   },
+
   created_at: {
     type: Date,
     default: Date.now,

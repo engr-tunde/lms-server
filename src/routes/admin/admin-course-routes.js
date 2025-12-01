@@ -14,6 +14,8 @@ const {
   fetchCourseMaterials,
   deleteCourseMaterial,
   deleteCourse,
+  setCourseAsDraft,
+  setCourseAsArchive,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -31,6 +33,8 @@ router.post(
 );
 router.post("/add-course-requirements/:id", addNewCourseRequirements);
 router.post("/add-course-pricing/:id", setCoursePricing);
+router.put("/draft-course/:id", setCourseAsDraft);
+router.put("/archive-course/:id", setCourseAsArchive);
 
 router.get("/fetch-all-courses", fetchAllCourses);
 router.get("/fetch-course-materials/:material_id", fetchCourseMaterials);

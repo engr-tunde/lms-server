@@ -14,8 +14,8 @@ exports.sendTryCtachError = (res, error) => {
 exports.badRequestError = (res, error, status = 400) => {
   res.status(status).json({ success: false, error });
 };
-exports.sendLoginError = (res, error, loginStatus = 0, status = 401) => {
-  res.status(status).json({ success: false, loginStatus, error });
+exports.sendLoginError = (res, error, status = 401) => {
+  res.status(status).json({ success: false, error });
 };
 exports.sendSuccess = (res, message, data = null, status = 200) => {
   res.status(status).json({ success: true, message, data });

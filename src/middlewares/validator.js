@@ -1,6 +1,21 @@
 const { check, validationResult } = require("express-validator");
 
 // User
+exports.validateUserSignupParams = [
+  check("name")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Your full name is missing!")
+    .isLength({ min: 6, max: 40 })
+    .withMessage("Name must be between 6 and 40 characters"),
+  check("email").isEmail().withMessage("Email is invalid"),
+  check("password")
+    .trim()
+    .not()
+    .isEmpty()
+    .withMessage("Password cannot be empty"),
+];
 
 // Admin Dashboard
 exports.validateAdmin = [

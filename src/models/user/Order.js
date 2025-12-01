@@ -8,7 +8,11 @@ const orderSchema = new Schema({
     ref: "User",
     required: true,
   },
-  course: {
+  course_id: {
+    type: String,
+    required: true,
+  },
+  course_title: {
     type: String,
     required: true,
   },

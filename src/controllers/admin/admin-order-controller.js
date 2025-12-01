@@ -7,7 +7,29 @@ const fetchAllOrders = async (req, res) => {
     const allOrders = await Order.find()
       .limit(req.query.limit)
       .sort({ createdAt: -1 });
-    return sendSuccess(res, "Successfully fetched orders", allOrders);
+    let totalOrdersCount = allOrders?.length;
+    let totalOrdersAmount = 0;
+
+    allOrders.forEach((order) => {
+      totalOrdersAmount = totalOrdersAmount + order?.total_paid;
+    });
+
+    // let pendingOrdersCount = allOrders?.filter(
+    //   (item) => item.status === "published"
+    // )?.length;
+    // let draftOrdersCount = allOrders?.filter(
+    //   (item) => item.status === "draft"
+    // )?.length;
+    // let archivedOrdersCount = allOrders?.filter(
+    //   (item) => item.status === "archived"
+    // )?.length;
+
+    return sendSuccess(res, "Successfully fetched orders", {
+      orders: {
+        count: allOrders,
+        total: totalOrdersAmount,
+      },
+    });
   } catch (error) {
     console.log(error);
     return sendError(res, "Unable to fetch the orders data");
