@@ -99,6 +99,7 @@ const addNewCourseOverview = async (req, res) => {
     return sendError(res, "Unable to add new course overview");
   }
 };
+
 const addNewCourseMaterial = async (req, res) => {
   const action_by = await actionUser(req.id);
   if (!action_by) {
@@ -125,6 +126,7 @@ const addNewCourseMaterial = async (req, res) => {
     return sendError(res, "Unable to add new course material");
   }
 };
+
 const addNewCourseRequirements = async (req, res) => {
   const action_by = await actionUser(req.id);
   const { requirements, audience, duration, certificate } = req.body;
@@ -156,6 +158,7 @@ const addNewCourseRequirements = async (req, res) => {
     return sendError(res, "Unable to add new course requirements & audience");
   }
 };
+
 const setCoursePricing = async (req, res) => {
   const action_by = await actionUser(req.id);
   if (!action_by) {
@@ -192,6 +195,43 @@ const setCoursePricing = async (req, res) => {
     return sendError(res, "Unable to complete course publishing");
   }
 };
+const editCoursePricing = async (req, res) => {
+  const action_by = await actionUser(req.id);
+  if (!action_by) {
+    return sendError(res, "You are not authenticated");
+  }
+  req.body.action_by = action_by;
+  try {
+    const course = await Course.findById(req.params.id);
+    if (course) {
+      if (req.body.discount) {
+        if (req.body.price) {
+          let discount = Number((req.body.discount / 100) * req.body.price);
+          let price = Number(req.body.price);
+          course.discount = discount;
+          course.price = price;
+          course.total_price = price - discount;
+        } else {
+          let discount = Number((req.body.discount / 100) * course.price);
+          course.discount = discount;
+          course.price = course.price;
+          course.total_price = course.price - discount;
+        }
+      }
+      course.currency = req.body.currency || course.currency;
+      await course.save();
+      return sendSuccess(res, "Successfully updated course course", {
+        course,
+      });
+    } else {
+      return sendError(res, "Course data has not been instantiated");
+    }
+  } catch (err) {
+    console.log(err);
+    return sendError(res, "Unable to complete course publishing");
+  }
+};
+
 const setCourseAsDraft = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
@@ -318,6 +358,8 @@ module.exports = {
   addNewCourseMaterial,
   addNewCourseRequirements,
   setCoursePricing,
+  editCoursePricing,
+
   setCourseAsDraft,
   setCourseAsArchive,
 

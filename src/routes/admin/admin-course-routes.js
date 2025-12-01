@@ -16,6 +16,7 @@ const {
   deleteCourse,
   setCourseAsDraft,
   setCourseAsArchive,
+  editCoursePricing,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -33,6 +34,8 @@ router.post(
 );
 router.post("/add-course-requirements/:id", addNewCourseRequirements);
 router.post("/add-course-pricing/:id", setCoursePricing);
+router.put("/edit-course-pricing/:id", editCoursePricing);
+
 router.put("/draft-course/:id", setCourseAsDraft);
 router.put("/archive-course/:id", setCourseAsArchive);
 
