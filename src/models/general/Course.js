@@ -48,7 +48,11 @@ const expenseSchema = new Schema({
     type: String,
     default: "US Dollar",
   },
-  discount: {
+  discount_percent: {
+    type: Double,
+    default: 0,
+  },
+  discount_value: {
     type: Double,
     default: 0,
   },
@@ -61,7 +65,11 @@ const expenseSchema = new Schema({
   },
   status: {
     type: String,
-    status: "draft",
+    default: "draft",
+  },
+  progress_status: {
+    type: String,
+    default: "overview",
   },
   action_by: {
     type: String,

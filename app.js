@@ -11,6 +11,8 @@ const adminOrderRouter = require("./src/routes/admin/admin-order-routes");
 const userauthRouter = require("./src/routes/user/user-auth-routes");
 const userRouter = require("./src/routes/user/user-routes");
 
+const publicRouter = require("./src/routes/public/public-routes");
+
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const { connect } = require("./db");
@@ -29,13 +31,8 @@ app.use(
       "http://localhost:5174",
       "http://localhost:5175",
       "http://localhost:3000",
-      "http://192.168.0.132:3000",
-      "http://192.168.0.132:5173",
-      "http://192.168.0.132:5174",
-      "http://thelcreamery.com",
-      "https://thelcreamery.vercel.app",
-      "https://thelcreamery.onrender.com",
-      "https://thel-creamery.onrender.com",
+      "https://lms-admin-ruwg.onrender.com",
+      "https://lms-frontend-lw9z.onrender.com",
     ],
   })
 );
@@ -49,7 +46,9 @@ app.use("/api/v1/admin/user", verifyLoginToken, adminUserRouter);
 app.use("/api/v1/admin/order", verifyLoginToken, adminOrderRouter);
 
 app.use("/api/v1/user-auth", userauthRouter);
+
 app.use("/api/v1/user", verifyUserLoginToken, userRouter);
+app.use("/api/v1/public", publicRouter);
 
 app.get("/", (req, res) => {
   res.send(

@@ -16,7 +16,10 @@ const {
   deleteCourse,
   setCourseAsDraft,
   setCourseAsArchive,
-  editCoursePricing,
+  editCourseOverview,
+  editCourseRequirements,
+  publishCourse,
+  fetchCourseDetails,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -27,20 +30,26 @@ router.get("/fetch-all-categories", fetchCourseCategories);
 router.delete("/delete-category/:id", deleteCourseCategory);
 
 router.post("/add-course-overview", addNewCourseOverview);
+router.put("/update-course-overview/:id", editCourseOverview);
+
 router.post(
   "/add-course-material/:id",
-  upload.array("file"),
+  upload.array("video"),
   addNewCourseMaterial
 );
 router.post("/add-course-requirements/:id", addNewCourseRequirements);
+router.put("/update-course-requirements/:id", editCourseRequirements);
+
 router.post("/add-course-pricing/:id", setCoursePricing);
-router.put("/edit-course-pricing/:id", editCoursePricing);
+
+router.post("/publish-course/:id", publishCourse);
 
 router.put("/draft-course/:id", setCourseAsDraft);
 router.put("/archive-course/:id", setCourseAsArchive);
 
 router.get("/fetch-all-courses", fetchAllCourses);
-router.get("/fetch-course-materials/:material_id", fetchCourseMaterials);
+router.get("/course-details/:id", fetchCourseDetails);
+router.get("/fetch-course-materials/:course_id", fetchCourseMaterials);
 router.delete("/delete-course-material/:id", deleteCourseMaterial);
 router.delete("/delete-course/:id", deleteCourse);
 

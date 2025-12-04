@@ -99,6 +99,36 @@ const addNewCourseOverview = async (req, res) => {
     return sendError(res, "Unable to add new course overview");
   }
 };
+const editCourseOverview = async (req, res) => {
+  const action_by = await actionUser(req.id);
+  const { title, category, level, language, what_to_taught, description } =
+    req.body;
+  if (!action_by) {
+    return sendError(res, "You are not authenticated");
+  }
+  req.body.action_by = action_by;
+  try {
+    const course = await Course.findById(req.params.id);
+    if (course) {
+      course.title = title;
+      course.category = category;
+      course.level = level;
+      course.language = language;
+      course.what_to_taught = what_to_taught;
+      course.description = description;
+      await course.save();
+      return sendSuccess(res, "Course overview details updated!", {
+        course_id: course._id,
+        courseData: course,
+      });
+    } else {
+      return sendError(res, "Unable to find course data");
+    }
+  } catch (err) {
+    console.log(err);
+    return sendError(res, "Unable to add new course overview");
+  }
+};
 
 const addNewCourseMaterial = async (req, res) => {
   const action_by = await actionUser(req.id);
@@ -112,7 +142,9 @@ const addNewCourseMaterial = async (req, res) => {
     const course = await Course.findById(req.params.id);
     if (course) {
       req.body.course_id = course._id;
+      course.progress_status = "materials";
       const courseMat = new CourseMaterial(req.body);
+      await course.save();
       await courseMat.save();
       return sendSuccess(res, "Successfully added the course material", {
         course_id: course._id,
@@ -142,6 +174,7 @@ const addNewCourseRequirements = async (req, res) => {
       course.audience = audience;
       course.duration = duration;
       course.certificate = certificate;
+      course.progress_status = "requirements";
       await course.save();
       return sendSuccess(
         res,
@@ -158,6 +191,38 @@ const addNewCourseRequirements = async (req, res) => {
     return sendError(res, "Unable to add new course requirements & audience");
   }
 };
+const editCourseRequirements = async (req, res) => {
+  const action_by = await actionUser(req.id);
+  const { requirements, audience, duration, certificate } = req.body;
+  if (!action_by) {
+    return sendError(res, "You are not authenticated");
+  }
+  req.body.action_by = action_by;
+
+  try {
+    const course = await Course.findById(req.params.id);
+    if (course) {
+      course.requirements = requirements;
+      course.audience = audience;
+      course.duration = duration;
+      course.certificate = certificate;
+      await course.save();
+      return sendSuccess(
+        res,
+        "Course requirements & audience have been updated",
+        {
+          course_id: course._id,
+          courseData: course,
+        }
+      );
+    } else {
+      return sendError(res, "Course data has not be found");
+    }
+  } catch (err) {
+    console.log(err);
+    return sendError(res, "Unable to add new course requirements & audience");
+  }
+};
 
 const setCoursePricing = async (req, res) => {
   const action_by = await actionUser(req.id);
@@ -165,28 +230,28 @@ const setCoursePricing = async (req, res) => {
     return sendError(res, "You are not authenticated");
   }
   let price = req.body.price || 0;
-  let discount;
+  let discountPercent = req.body.discount_percent || 0;
+  let discountVal;
 
   req.body.action_by = action_by;
-  if (discount) {
-    discount = Number((req.body.discount / 100) * price);
-  } else {
-    discount = 0;
-  }
-  const total_price = price - discount;
+  discountVal = Number((discountPercent / 100) * price);
+  const total_price = price - discountVal;
 
   try {
     const course = await Course.findById(req.params.id);
     if (course) {
       course.price = price;
       course.currency = req.body.currency || "US Dollar";
-      course.discount = discount;
+      course.discount_percent = discountPercent;
+      course.discount_value = discountVal;
       course.total_price = total_price;
-      course.status = "published";
+      course.progress_status = "pricing";
       await course.save();
-      return sendSuccess(res, "Successfully completed course publishing", {
-        course,
-      });
+      return sendSuccess(
+        res,
+        "Successfully added pricing data to the course",
+        course
+      );
     } else {
       return sendError(res, "Course data has not been instantiated");
     }
@@ -195,7 +260,8 @@ const setCoursePricing = async (req, res) => {
     return sendError(res, "Unable to complete course publishing");
   }
 };
-const editCoursePricing = async (req, res) => {
+
+const publishCourse = async (req, res) => {
   const action_by = await actionUser(req.id);
   if (!action_by) {
     return sendError(res, "You are not authenticated");
@@ -204,25 +270,10 @@ const editCoursePricing = async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
     if (course) {
-      if (req.body.discount) {
-        if (req.body.price) {
-          let discount = Number((req.body.discount / 100) * req.body.price);
-          let price = Number(req.body.price);
-          course.discount = discount;
-          course.price = price;
-          course.total_price = price - discount;
-        } else {
-          let discount = Number((req.body.discount / 100) * course.price);
-          course.discount = discount;
-          course.price = course.price;
-          course.total_price = course.price - discount;
-        }
-      }
-      course.currency = req.body.currency || course.currency;
+      course.status = "published";
+      course.progress_status = "completed";
       await course.save();
-      return sendSuccess(res, "Successfully updated course course", {
-        course,
-      });
+      return sendSuccess(res, "Successfully published the course", course);
     } else {
       return sendError(res, "Course data has not been instantiated");
     }
@@ -296,6 +347,22 @@ const fetchAllCourses = async (req, res) => {
   }
 };
 
+const fetchCourseDetails = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    const courseMats = await CourseMaterial.find({
+      course_id: req.params.id,
+    });
+    return sendSuccess(res, "Successfully fetched courses", {
+      courseData: course,
+      courseMaterials: courseMats,
+    });
+  } catch (error) {
+    console.log(error);
+    return sendError(res, "Unable to fetch the data");
+  }
+};
+
 const deleteCourse = async (req, res) => {
   try {
     await Course.findByIdAndDelete(req.params.id);
@@ -310,9 +377,7 @@ const fetchCourseMaterials = async (req, res) => {
   try {
     const courseMats = await CourseMaterial.find({
       course_id: req.params.course_id,
-    })
-      .sort({ _id: "desc" })
-      .limit(req.query.limit);
+    });
     return sendSuccess(res, "Successfully fetched courses", courseMats);
   } catch (error) {
     console.log(error);
@@ -355,15 +420,22 @@ module.exports = {
   deleteCourseCategory,
 
   addNewCourseOverview,
+  editCourseOverview,
+
   addNewCourseMaterial,
+
   addNewCourseRequirements,
+  editCourseRequirements,
+
   setCoursePricing,
-  editCoursePricing,
+
+  publishCourse,
 
   setCourseAsDraft,
   setCourseAsArchive,
 
   fetchAllCourses,
+  fetchCourseDetails,
   deleteCourse,
 
   fetchCourseMaterials,
