@@ -93,6 +93,7 @@ const addNewCourseOverview = async (req, res) => {
     await course.save();
     return sendSuccess(res, "Course overview details successfully set.", {
       course_id: course._id,
+      courseData: course,
     });
   } catch (err) {
     console.log(err);
@@ -148,6 +149,7 @@ const addNewCourseMaterial = async (req, res) => {
       await courseMat.save();
       return sendSuccess(res, "Successfully added the course material", {
         course_id: course._id,
+        courseData: course,
         newMaterial: courseMat,
       });
     } else {
@@ -181,6 +183,7 @@ const addNewCourseRequirements = async (req, res) => {
         "Successfully added the course requirements & audience",
         {
           course_id: course._id,
+          courseData: course,
         }
       );
     } else {
