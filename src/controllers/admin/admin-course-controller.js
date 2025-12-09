@@ -131,14 +131,12 @@ const editCourseOverview = async (req, res) => {
   }
 };
 
-const addNewCourseMaterial = async (req, res) => {
+const addCourseMaterialTitle = async (req, res) => {
   const action_by = await actionUser(req.id);
   if (!action_by) {
     return sendError(res, "You are not authenticated");
   }
   req.body.action_by = action_by;
-  const videoFile = await uploadSingleImage(req);
-  req.body.video = videoFile?.url;
   try {
     const course = await Course.findById(req.params.id);
     if (course) {
@@ -150,7 +148,49 @@ const addNewCourseMaterial = async (req, res) => {
       return sendSuccess(res, "Successfully added the course material", {
         course_id: course._id,
         courseData: course,
-        newMaterial: courseMat,
+        material_id: courseMat._id,
+        materialData: courseMat,
+      });
+    } else {
+      return sendError(res, "Course data has not been instantiated");
+    }
+  } catch (err) {
+    console.log(err);
+    return sendError(res, "Unable to add new course material");
+  }
+};
+const addCourseMaterialFile = async (req, res) => {
+  const action_by = await actionUser(req.id);
+  if (!action_by) {
+    return sendError(res, "You are not authenticated");
+  }
+  req.body.action_by = action_by;
+  const videoFile = await uploadSingleImage(req);
+  req.body.video = videoFile?.url;
+  try {
+    const courseMat = await CourseMaterial.findById(req.params.id);
+    if (courseMat) {
+      let currentMatVideos = courseMat.video;
+      let currentMatArticles = courseMat.article;
+
+      if (req.body.video) {
+        let newMatVideos = currentMatVideos.push();
+        courseMat.video = newMatVideos;
+      }
+      if (req.body.article) {
+        let newMatArticles = currentMatArticles.push();
+        courseMat.article = newMatArticles;
+      }
+
+      // console.log("currentMatVideos", currentMatVideos);
+      // console.log("currentMatArticles", currentMatArticles);
+      // console.log("newMatVideos", newMatVideos);
+      // console.log("newMatArticles", newMatArticles);
+
+      await courseMat.save();
+      return sendSuccess(res, "Successfully added the course material", {
+        material_id: req.params.id,
+        materialData: courseMat,
       });
     } else {
       return sendError(res, "Course data has not been instantiated");
@@ -425,7 +465,8 @@ module.exports = {
   addNewCourseOverview,
   editCourseOverview,
 
-  addNewCourseMaterial,
+  addCourseMaterialTitle,
+  addCourseMaterialFile,
 
   addNewCourseRequirements,
   editCourseRequirements,

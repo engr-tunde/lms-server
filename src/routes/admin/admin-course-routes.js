@@ -20,6 +20,8 @@ const {
   editCourseRequirements,
   publishCourse,
   fetchCourseDetails,
+  addCourseMaterialTitle,
+  addCourseMaterialFile,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -32,10 +34,11 @@ router.delete("/delete-category/:id", deleteCourseCategory);
 router.post("/add-course-overview", addNewCourseOverview);
 router.put("/update-course-overview/:id", editCourseOverview);
 
+router.post("/add-course-material-title/:id", addCourseMaterialTitle);
 router.post(
-  "/add-course-material/:id",
+  "/add-course-material-files/:id",
   upload.array("video"),
-  addNewCourseMaterial
+  addCourseMaterialFile
 );
 router.post("/add-course-requirements/:id", addNewCourseRequirements);
 router.put("/update-course-requirements/:id", editCourseRequirements);

@@ -15,10 +15,10 @@ const dataSchema = new Schema({
     required: true,
   },
   article: {
-    type: String,
+    type: Array,
   },
   video: {
-    type: String,
+    type: Array,
   },
   action_by: {
     type: String,
