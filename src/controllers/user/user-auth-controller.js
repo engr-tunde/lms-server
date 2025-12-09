@@ -179,7 +179,7 @@ const login = async (req, res) => {
 
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
   if (!isPasswordCorrect) {
-    return sendLoginError(res, "Invalid login ID or password", 0);
+    return sendError(res, "Invalid login ID or password");
   }
   if (!user.email_verified) {
     return res.status(200).json({
