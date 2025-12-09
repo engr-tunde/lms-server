@@ -48,30 +48,24 @@ const isPasswordResetTokenValid = async (req, res, next) => {
 const validateLoginType = async (req, res, next) => {
   const { email, password } = req.body;
 
-  let user;
-  let userIdentity;
-
-  userIdentity = email.toLowerCase();
-
   if (!email) {
-    return sendLoginError(res, "email is missing", 1);
+    return sendError(res, "email is missing");
   }
 
   try {
-    user = await User.findOne({ email: userIdentity });
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return sendError(res, "Email not registered. Signup instead.", 206);
+    }
+    req.body = {
+      user,
+      password,
+    };
+
+    next();
   } catch (err) {
-    return sendLoginError(res, err.message, 1, 500);
+    return sendError(res, err.message, 500);
   }
-  if (!user) {
-    return sendLoginError(res, "Email not registered. Signup instead.", 206);
-  }
-
-  req.body = {
-    user,
-    password,
-  };
-
-  next();
 };
 
 module.exports = {
