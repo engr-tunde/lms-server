@@ -61,10 +61,9 @@ const validateLoginType = async (req, res, next) => {
       user,
       password,
     };
-
     next();
   } catch (err) {
-    return sendError(res, err.message, 500);
+    return sendError(res, err.message);
   }
 };
 

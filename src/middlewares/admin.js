@@ -64,24 +64,18 @@ const validateAdminLoginType = async (req, res, next) => {
     return sendError(res, "email is missing", 1);
   }
 
-  let existingAdmin;
-  let adminIdentity;
-
-  if (email.includes("@")) {
-    adminIdentity = email.toLowerCase();
-    try {
-      existingAdmin = await Admin.findOne({ email: adminIdentity });
-      if (!existingAdmin) {
-        return sendError(res, "Email not registered. Access denied.");
-      }
-      req.body = {
-        existingAdmin,
-        password,
-      };
-      next();
-    } catch (err) {
-      return sendError(res, err.message, 500);
+  try {
+    let existingAdmin = await Admin.findOne({ email: email.toLowerCase() });
+    if (!existingAdmin) {
+      return sendError(res, "Email not registered. Access denied.");
     }
+    req.body = {
+      existingAdmin,
+      password,
+    };
+    next();
+  } catch (err) {
+    return sendError(res, err.message);
   }
 };
 
