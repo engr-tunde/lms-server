@@ -1,6 +1,9 @@
-const bcrypt = require("bcryptjs");
-const { sendError, sendSuccess, generateSlug } = require("../../utils/helpers");
-const Admin = require("../../models/admin/Admin");
+const {
+  sendError,
+  sendSuccess,
+  generateSlug,
+  createRandomBytes,
+} = require("../../utils/helpers");
 const { actionUser } = require("../../middlewares/admin");
 const Course = require("../../models/general/Course");
 const CourseCategory = require("../../models/general/CourseCategory");
@@ -10,6 +13,7 @@ const {
 } = require("../../middlewares/general");
 const CourseMaterial = require("../../models/general/CourseMaterial");
 const Order = require("../../models/user/Order");
+const CourseMaterialFile = require("../../models/general/CourseMaterialFile");
 
 const addNewCourseCategory = async (req, res) => {
   const action_by = await actionUser(req.id);
@@ -139,11 +143,13 @@ const addCourseMaterialTitle = async (req, res) => {
   req.body.action_by = action_by;
   try {
     const course = await Course.findById(req.params.id);
+    req.body.course_id = course._id;
+    const courseMat = new CourseMaterial(req.body);
     if (course) {
-      req.body.course_id = course._id;
-      course.progress_status = "materials";
-      const courseMat = new CourseMaterial(req.body);
-      await course.save();
+      if (course.progress_status === "overview") {
+        course.progress_status = "materials";
+        await course.save();
+      }
       await courseMat.save();
       return sendSuccess(res, "Successfully added the course material", {
         course_id: course._id,
@@ -161,37 +167,55 @@ const addCourseMaterialTitle = async (req, res) => {
 };
 const addCourseMaterialFile = async (req, res) => {
   const action_by = await actionUser(req.id);
+  const { type } = req.body;
+  const { files } = req;
   if (!action_by) {
     return sendError(res, "You are not authenticated");
   }
-  req.body.action_by = action_by;
-  const videoFile = await uploadSingleImage(req);
-  req.body.video = videoFile?.url;
+  let newMaterialFile;
+  let file_id = await createRandomBytes();
+
   try {
     const courseMat = await CourseMaterial.findById(req.params.id);
     if (courseMat) {
-      let currentMatVideos = courseMat.video;
-      let currentMatArticles = courseMat.article;
+      if (type === "article") {
+        newMaterialFile = {
+          type,
+          material: req.body.material,
+          file_id,
+        };
+      } else if (type === "video") {
+        if (!files?.material) {
+          return sendError(res, "Song image is missing!");
+        }
+        const materialFile = files.material[0];
 
-      if (req.body.video) {
-        let newMatVideos = currentMatVideos.push();
-        courseMat.video = newMatVideos;
+        const material = await uploadSingleVideo(materialFile);
+        console.log("material", material);
+        if (material) {
+          newMaterialFile = {
+            type,
+            material: material?.url,
+            file_id,
+          };
+        } else {
+          return sendError(res, "Unable to finish nvideo upload");
+        }
       }
-      if (req.body.article) {
-        let newMatArticles = currentMatArticles.push();
-        courseMat.article = newMatArticles;
+
+      const currentCourseMats = courseMat?.materials;
+
+      currentCourseMats.push(newMaterialFile);
+
+      courseMat.materials = currentCourseMats;
+
+      const saveData = await courseMat.save();
+      if (saveData) {
+        return sendSuccess(res, "Successfully added the course material", {
+          material_id: req.params.id,
+          materialData: courseMat,
+        });
       }
-
-      // console.log("currentMatVideos", currentMatVideos);
-      // console.log("currentMatArticles", currentMatArticles);
-      // console.log("newMatVideos", newMatVideos);
-      // console.log("newMatArticles", newMatArticles);
-
-      await courseMat.save();
-      return sendSuccess(res, "Successfully added the course material", {
-        material_id: req.params.id,
-        materialData: courseMat,
-      });
     } else {
       return sendError(res, "Course data has not been instantiated");
     }
@@ -418,10 +442,17 @@ const deleteCourse = async (req, res) => {
 
 const fetchCourseMaterials = async (req, res) => {
   try {
-    const courseMats = await CourseMaterial.find({
-      course_id: req.params.course_id,
-    });
-    return sendSuccess(res, "Successfully fetched courses", courseMats);
+    const courseMats = await CourseMaterial.find(
+      {
+        course_id: req.params.course_id,
+      },
+      ["-created_at", "-updated_at", "-course_id", "-__v"]
+    );
+    return sendSuccess(
+      res,
+      "Successfully fetched course materials",
+      courseMats
+    );
   } catch (error) {
     console.log(error);
     return sendError(res, "Unable to fetch the data");
@@ -450,6 +481,32 @@ const deleteCourseMaterial = async (req, res) => {
   try {
     await CourseMaterial.findByIdAndDelete(req.params.id);
     return sendSuccess(res, "Successfully deleted the course material");
+  } catch (err) {
+    console.log(err);
+    return sendError(res, "Unable to delete the data");
+  }
+};
+
+const deleteCourseMaterialFile = async (req, res) => {
+  const { material_id, file_id } = req.query;
+  try {
+    const courseMat = await CourseMaterial.findById(material_id);
+    if (!courseMat) {
+      return sendError(res, "Unable to verify the course material");
+    }
+    const currentCourseMats = courseMat?.materials;
+    const otherMatFiles = currentCourseMats?.filter(
+      (item) => item?.file_id !== file_id
+    );
+    courseMat.materials = otherMatFiles;
+    const saveData = await courseMat.save();
+    if (saveData) {
+      return sendSuccess(
+        res,
+        "Successfully deleted the course material",
+        saveData
+      );
+    }
   } catch (err) {
     console.log(err);
     return sendError(res, "Unable to delete the data");
@@ -485,4 +542,5 @@ module.exports = {
   fetchCourseMaterials,
   fetchCourseOrders,
   deleteCourseMaterial,
+  deleteCourseMaterialFile,
 };

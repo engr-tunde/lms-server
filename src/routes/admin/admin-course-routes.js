@@ -22,6 +22,7 @@ const {
   fetchCourseDetails,
   addCourseMaterialTitle,
   addCourseMaterialFile,
+  deleteCourseMaterialFile,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -55,5 +56,6 @@ router.get("/course-details/:id", fetchCourseDetails);
 router.get("/fetch-course-materials/:course_id", fetchCourseMaterials);
 router.delete("/delete-course-material/:id", deleteCourseMaterial);
 router.delete("/delete-course/:id", deleteCourse);
+router.delete("/delete-material-file", deleteCourseMaterialFile);
 
 module.exports = router;

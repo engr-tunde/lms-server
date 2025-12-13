@@ -2,23 +2,20 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const dataSchema = new Schema({
-  course_id: {
+  material_id: {
     // type: String,
     required: true,
 
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Course",
+    ref: "CourseMaterial",
   },
-  title: {
+  material: {
     type: String,
     required: true,
   },
-  objective: {
+  type: {
     type: String,
     required: true,
-  },
-  materials: {
-    type: Array,
   },
   action_by: {
     type: String,
@@ -34,4 +31,4 @@ const dataSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("CourseMaterial", dataSchema);
+module.exports = mongoose.model("CourseMaterialFile", dataSchema);

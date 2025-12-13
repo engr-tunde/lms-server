@@ -18,3 +18,17 @@ exports.uploads = (file, folder) => {
     });
   });
 };
+
+exports.videoUpload = (req) => {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      { resource_type: "video" },
+      (error, result) => {
+        if (error) reject(error);
+        resolve(result);
+      }
+    );
+    // stream.end(req.file.buffer);
+    // return result;
+  });
+};
