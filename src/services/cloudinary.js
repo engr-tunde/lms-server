@@ -8,27 +8,53 @@ cloudinary.config({
   secure: true,
 });
 
+exports.autoUploads = (file, folder) => {
+  return new Promise((resolve) => {
+    cloudinary.uploader.upload_large(
+      file,
+      { resource_type: "auto" },
+      (error, result) => {
+        if (error) reject(error);
+        resolve({
+          url: result.url,
+          id: result.public_id,
+        });
+      }
+    );
+  });
+};
+
 exports.uploads = (file, folder) => {
   return new Promise((resolve) => {
     cloudinary.uploader.upload(file, (error, result) => {
       resolve({
-        url: result.url,
+        url: result.secure_url,
         id: result.public_id,
       });
     });
   });
 };
 
-exports.videoUpload = (req) => {
+exports.videoUpload = (file) => {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload_stream(
+    cloudinary.uploader.upload(
+      file,
       { resource_type: "video" },
       (error, result) => {
         if (error) reject(error);
         resolve(result);
       }
     );
+    // .end(file);
     // stream.end(req.file.buffer);
     // return result;
   });
+  // .then((uploadResult) => {
+  //   console.log(
+  //     `Buffer upload_stream wth promise success - ${uploadResult.public_id}`
+  //   );
+  // })
+  // .catch((error) => {
+  //   console.error(error);
+  // });
 };

@@ -85,36 +85,12 @@ const logoutSession = async (token, secrete) => {
   return result;
 };
 
-const uploadSingleImage = async (req) => {
-  if (!req.files?.length) {
-    return null;
-  }
-  const uploader = async (path) => await cloudinary.uploads(path, "Images");
-  const file = req.files[0];
-  const { path } = file;
-  const image = await uploader(path);
+const uploadSingleFile = async (rawFile) => {
+  const uploader = async (path) => await cloudinary.autoUploads(path);
+  const { path } = rawFile;
+  const video = await uploader(path);
   fs.unlinkSync(path);
-  return image;
-};
-
-// const uploadSingleVideo = async (req) => {
-//   if (!req.files?.length) {
-//     return null;
-//   }
-//   const uploader = async (path) => await cloudinary.uploads(path, "Images");
-//   const file = req.files[0];
-//   const { path } = file;
-//   const video = await uploader(path);
-//   fs.unlinkSync(path);
-//   return video;
-// };
-
-const uploadSingleVideo = async (audioFile) => {
-  const uploader = async (path) => await cloudinary.videoUpload(path);
-  const { path } = audioFile;
-  const audio = await uploader(path);
-  fs.unlinkSync(path);
-  return audio;
+  return video;
 };
 
 const uploadMultipleImages = async (req, res, errorMessage) => {
@@ -142,7 +118,6 @@ module.exports = {
   verifyLoginSession,
   logoutSession,
 
-  uploadSingleImage,
-  uploadSingleVideo,
+  uploadSingleFile,
   uploadMultipleImages,
 };

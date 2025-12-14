@@ -39,6 +39,7 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.static("public"));
+app.use(express.json({ limit: "5gb" }));
 app.use("/api/v1/admin-auth", authRouter);
 app.use("/api/v1/admin", verifyLoginToken, adminRouter);
 app.use("/api/v1/admin/course", verifyLoginToken, adminCourseRouter);

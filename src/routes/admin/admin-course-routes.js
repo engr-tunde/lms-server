@@ -38,7 +38,8 @@ router.put("/update-course-overview/:id", editCourseOverview);
 router.post("/add-course-material-title/:id", addCourseMaterialTitle);
 router.post(
   "/add-course-material-files/:id",
-  upload.array("video"),
+  // upload.array("material"),
+  upload.fields([{ name: "material", maxCount: 1 }]),
   addCourseMaterialFile
 );
 router.post("/add-course-requirements/:id", addNewCourseRequirements);

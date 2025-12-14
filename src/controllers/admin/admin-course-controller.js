@@ -7,13 +7,9 @@ const {
 const { actionUser } = require("../../middlewares/admin");
 const Course = require("../../models/general/Course");
 const CourseCategory = require("../../models/general/CourseCategory");
-const {
-  uploadSingleImage,
-  uploadSingleVideo,
-} = require("../../middlewares/general");
+const { uploadSingleFile } = require("../../middlewares/general");
 const CourseMaterial = require("../../models/general/CourseMaterial");
 const Order = require("../../models/user/Order");
-const CourseMaterialFile = require("../../models/general/CourseMaterialFile");
 
 const addNewCourseCategory = async (req, res) => {
   const action_by = await actionUser(req.id);
@@ -184,14 +180,13 @@ const addCourseMaterialFile = async (req, res) => {
           material: req.body.material,
           file_id,
         };
-      } else if (type === "video") {
-        if (!files?.material) {
-          return sendError(res, "Song image is missing!");
+      } else {
+        if (!files) {
+          return sendError(res, "Material video file is missing!");
         }
         const materialFile = files.material[0];
 
-        const material = await uploadSingleVideo(materialFile);
-        console.log("material", material);
+        const material = await uploadSingleFile(materialFile);
         if (material) {
           newMaterialFile = {
             type,
@@ -204,11 +199,8 @@ const addCourseMaterialFile = async (req, res) => {
       }
 
       const currentCourseMats = courseMat?.materials;
-
       currentCourseMats.push(newMaterialFile);
-
       courseMat.materials = currentCourseMats;
-
       const saveData = await courseMat.save();
       if (saveData) {
         return sendSuccess(res, "Successfully added the course material", {
