@@ -23,6 +23,7 @@ const {
   addCourseMaterialTitle,
   addCourseMaterialFile,
   deleteCourseMaterialFile,
+  editCourseMaterialFile,
 } = require("../../controllers/admin/admin-course-controller");
 
 const router = express.Router();
@@ -41,6 +42,11 @@ router.post(
   // upload.array("material"),
   upload.fields([{ name: "material", maxCount: 1 }]),
   addCourseMaterialFile
+);
+router.patch(
+  "/update-course-material-file",
+  upload.fields([{ name: "material", maxCount: 1 }]),
+  editCourseMaterialFile
 );
 router.post("/add-course-requirements/:id", addNewCourseRequirements);
 router.put("/update-course-requirements/:id", editCourseRequirements);

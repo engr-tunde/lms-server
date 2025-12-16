@@ -181,7 +181,7 @@ const addCourseMaterialFile = async (req, res) => {
           file_id,
         };
       } else {
-        if (!files) {
+        if (!files?.material) {
           return sendError(res, "Material video file is missing!");
         }
         const materialFile = files.material[0];
@@ -200,6 +200,7 @@ const addCourseMaterialFile = async (req, res) => {
 
       const currentCourseMats = courseMat?.materials;
       currentCourseMats.push(newMaterialFile);
+
       courseMat.materials = currentCourseMats;
       const saveData = await courseMat.save();
       if (saveData) {
@@ -214,6 +215,56 @@ const addCourseMaterialFile = async (req, res) => {
   } catch (err) {
     console.log(err);
     return sendError(res, "Unable to add new course material");
+  }
+};
+const editCourseMaterialFile = async (req, res) => {
+  const { material_id, file_id } = req.query;
+  const { type } = req.body;
+  const { files } = req;
+  try {
+    const courseMat = await CourseMaterial.findById(material_id);
+    if (!courseMat) {
+      return sendError(res, "Unable to verify the course material");
+    }
+    const currentCourseMats = courseMat?.materials;
+    const otherMatFiles = currentCourseMats?.filter(
+      (item) => item?.file_id !== file_id
+    );
+    const selectedMatFiles = currentCourseMats?.filter(
+      (item) => item?.file_id === file_id
+    )[0];
+
+    if (type === "article") {
+      selectedMatFiles.material = req.body.material;
+    } else {
+      if (!files?.material) {
+        return sendError(res, "Material video file is missing!");
+      }
+      // console.log("files.material", files.material);
+      const materialFile = files.material[0];
+
+      const material = await uploadSingleFile(materialFile);
+      if (material) {
+        selectedMatFiles.material = material?.url;
+      } else {
+        return sendError(res, "Unable to finish nvideo upload");
+      }
+    }
+
+    otherMatFiles.push(selectedMatFiles);
+    courseMat.materials = otherMatFiles;
+    const saveData = await courseMat.save();
+
+    if (saveData) {
+      return sendSuccess(
+        res,
+        "Successfully deleted the course material",
+        saveData
+      );
+    }
+  } catch (err) {
+    console.log(err);
+    return sendError(res, "Unable to update the data");
   }
 };
 
@@ -516,6 +567,7 @@ module.exports = {
 
   addCourseMaterialTitle,
   addCourseMaterialFile,
+  editCourseMaterialFile,
 
   addNewCourseRequirements,
   editCourseRequirements,
