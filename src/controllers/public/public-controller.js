@@ -31,7 +31,10 @@ const fetchAvailableCourses = async (req, res) => {
 
 const fetchCourseDetails = async (req, res) => {
   try {
-    let course = await Course.findById(req.params.id)
+    let course = await Course.findOne({
+      _id: req.params.id,
+      status: "published",
+    })
       .sort({ _id: "desc" })
       .limit(req.query.limit);
 
@@ -40,8 +43,8 @@ const fetchCourseDetails = async (req, res) => {
     });
 
     courseMaterials = courseMaterials?.map((item) => ({
-      title: item.title,
-      objective: item.objective,
+      title: item?.title,
+      objective: item?.objective,
     }));
 
     course = {
@@ -58,6 +61,8 @@ const fetchCourseDetails = async (req, res) => {
       total_price: course.total_price,
       students: course.purchased_by?.length,
       course_content: courseMaterials,
+      requirements: course.requirements,
+      audience: course.audience,
     };
 
     return sendSuccess(res, "Successfully fetched data", course);
